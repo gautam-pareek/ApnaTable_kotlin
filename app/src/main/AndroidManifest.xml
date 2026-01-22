@@ -25,33 +25,32 @@
             android:name=".AddMenuActivity"
             android:exported="false" />
         <activity
-            android:name=".TableStatusActivity"
-            android:exported="false" />
-        <activity
             android:name=".CreateTableActivity"
             android:exported="true" />
         <activity
-            android:name=".DeliveryStatusActivity"
-            android:exported="false" />
-        <activity
-            android:name=".PreorderStatusActivity"
-            android:exported="false" />
+            android:name=".TableStatusActivity"
+            android:exported="true" />
         <activity
             android:name=".BusinessTableActivity"
             android:exported="false" />
         <activity
             android:name=".BusinessMenuActivity"
             android:exported="false" />
-        <activity android:name=".BusinessMainActivity" /> <!-- ✅ Make User_Type the launcher activity -->
+        <activity
+            android:name=".BusinessMainActivity"
+            android:exported="true"/>
+
+    <!-- ✅ Make User_Type the launcher activity -->
         <activity
             android:name=".User_Type"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+
         <activity
             android:name=".LoginActivity"
             android:exported="true" />

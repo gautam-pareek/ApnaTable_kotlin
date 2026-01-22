@@ -29,17 +29,16 @@
         <androidx.cardview.widget.CardView
             android:id="@+id/overlayCard"
             android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             app:cardBackgroundColor="#F6EBE5D7"
             app:cardCornerRadius="32dp"
             app:cardElevation="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHeight_percent="0.65"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.427"
-            app:layout_constraintWidth_percent="0.75">
+            app:layout_constraintWidth_percent="0.75"
+            android:layout_marginTop="120dp"
+            android:padding="24dp">
 
             <TextView
                 android:id="@+id/welcomeText"
@@ -47,7 +46,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
                 android:layout_marginStart="70dp"
-                android:text="Hello, what would you like to ask?"
+                android:text="Hello, what would you like to eat?"
                 android:textColor="#5B3902"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -62,7 +61,7 @@
                 android:background="@android:drawable/edit_text"
                 android:drawableStart="@android:drawable/ic_menu_search"
                 android:drawablePadding="8dp"
-                android:hint="Ask me anything about food"
+                android:hint="Food"
                 android:padding="12dp"
                 android:textColor="#000000"
                 android:textColorHint="#888888" />
@@ -71,13 +70,24 @@
                 android:id="@+id/sendAiQueryButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="210dp"
+                android:layout_marginTop="170dp"
                 android:layout_marginStart="70dp"
-                android:text="Ask"
+                android:text="Search"
                 android:backgroundTint="#E9A557"
                 android:textColor="#FFFFFF"/>
 
         </androidx.cardview.widget.CardView>
+
+        <!-- Search Results RecyclerView - Below the card but inside ConstraintLayout -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/searchResultsRecycler"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/overlayCard"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
         <!-- Toolbar -->
         <androidx.appcompat.widget.Toolbar

@@ -14,18 +14,6 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-
-data class MenuItem(
-    val name: String,
-    val images: List<String>,
-    val category: String,
-    val price: String,
-    val rating: Float,
-    val prepTime: String,
-    val ingredients: String
-)
 
 class AddMenuActivity : AppCompatActivity() {
 
@@ -36,6 +24,9 @@ class AddMenuActivity : AppCompatActivity() {
     private lateinit var adapter: MenuAdapter
     private var menuList = mutableListOf<MenuItem>()
 
+    private lateinit var dbHelper: UserDatabaseHelper
+    private var userId: Int = -1
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_menu)
@@ -43,12 +34,25 @@ class AddMenuActivity : AppCompatActivity() {
         val addMenuCapsule = findViewById<CardView>(R.id.addMenuCapsule)
         recyclerView = findViewById(R.id.recyclerMenu)
 
-        // Load saved data
-        menuList = loadMenuItems().toMutableList()
+        // DB helper
+        dbHelper = UserDatabaseHelper(this)
 
+        // get logged in user id from SharedPreferences
+        val sharedPref = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+        userId = sharedPref.getInt("loggedInUserId", -1)
+
+        // Initialize adapter first
         adapter = MenuAdapter(menuList)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
+
+        // Load saved data from server
+        if (userId != -1) {
+            loadMenuFromServer()
+        } else {
+            menuList = mutableListOf()
+            adapter.notifyDataSetChanged()
+        }
 
         addMenuCapsule.setOnClickListener {
             showAddMenuForm()
@@ -129,7 +133,7 @@ class AddMenuActivity : AppCompatActivity() {
                     val name = etProductName.text.toString()
                     val category = etCategory.text.toString()
                     val priceValue = etPrice.text.toString().replace("₹", "").trim()
-                    val price = "₹$priceValue"
+                    val priceNumber = priceValue.toDoubleOrNull() ?: 0.0
                     val rating = etRating.text.toString().toFloat()
                     val prepTime = etPrepTime.text.toString() + " min"
                     val ingredients = etIngredients.text.toString()
@@ -138,7 +142,7 @@ class AddMenuActivity : AppCompatActivity() {
                         name = name,
                         images = selectedImageUris.map { it.toString() },
                         category = category,
-                        price = price,
+                        price = priceNumber.toString(),
                         rating = rating,
                         prepTime = prepTime,
                         ingredients = ingredients
@@ -154,20 +158,160 @@ class AddMenuActivity : AppCompatActivity() {
     }
 
     private fun saveMenuItem(menuItem: MenuItem) {
-        menuList.add(menuItem)
-        adapter.notifyItemInserted(menuList.size - 1)
+        if (userId != -1) {
+            // Upload images first if any
+            if (menuItem.images.isNotEmpty()) {
+                uploadImagesAndSaveMenuItem(menuItem)
+            } else {
+                saveMenuItemToServer(menuItem, emptyList())
+            }
+        } else {
+            Toast.makeText(this, "Error: User not found", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun uploadImagesAndSaveMenuItem(menuItem: MenuItem) {
+        val uploadedImageUrls = mutableListOf<String>()
+        val totalImages = menuItem.images.size
+        var uploadedCount = 0
+        
+        if (totalImages == 0) {
+            saveMenuItemToServer(menuItem, emptyList())
+            return
+        }
+        
+        for (imageUri in menuItem.images) {
+            try {
+                val base64Image = ImageUtils.uriToBase64(this, android.net.Uri.parse(imageUri))
+                val filename = ImageUtils.getFilenameFromUri(android.net.Uri.parse(imageUri))
+                
+                if (base64Image != null) {
+                    val uploadRequest = ImageUploadRequest(base64Image, filename)
+                    RetrofitClient.instance.uploadImage(uploadRequest).enqueue(object : retrofit2.Callback<ImageUploadResponse> {
+                        override fun onResponse(call: retrofit2.Call<ImageUploadResponse>, response: retrofit2.Response<ImageUploadResponse>) {
+                            uploadedCount++
+                            if (response.isSuccessful && response.body()?.status == "success") {
+                                val imageUrl = "http://192.168.56.174:5000" + response.body()!!.imageUrl
+                                uploadedImageUrls.add(imageUrl)
+                            }
+                            
+                            // When all images are processed, save menu item
+                            if (uploadedCount == totalImages) {
+                                saveMenuItemToServer(menuItem, uploadedImageUrls)
+                            }
+                        }
+                        
+                        override fun onFailure(call: retrofit2.Call<ImageUploadResponse>, t: Throwable) {
+                            uploadedCount++
+                            // When all images are processed, save menu item
+                            if (uploadedCount == totalImages) {
+                                saveMenuItemToServer(menuItem, uploadedImageUrls)
+                            }
+                        }
+                    })
+                } else {
+                    uploadedCount++
+                    if (uploadedCount == totalImages) {
+                        saveMenuItemToServer(menuItem, uploadedImageUrls)
+                    }
+                }
+            } catch (e: Exception) {
+                uploadedCount++
+                if (uploadedCount == totalImages) {
+                    saveMenuItemToServer(menuItem, uploadedImageUrls)
+                }
+            }
+        }
+    }
+    
+    private fun saveMenuItemToServer(menuItem: MenuItem, serverImageUrls: List<String>) {
+        val menuRequest = MenuItemRequest(
+            userId = userId,
+            name = menuItem.name,
+            category = menuItem.category,
+            price = menuItem.price,
+            rating = menuItem.rating,
+            prepTime = menuItem.prepTime,
+            ingredients = menuItem.ingredients,
+            images = serverImageUrls
+        )
+        
+        RetrofitClient.instance.addMenuItem(menuRequest).enqueue(object : retrofit2.Callback<RegisterResponse> {
+            override fun onResponse(call: retrofit2.Call<RegisterResponse>, response: retrofit2.Response<RegisterResponse>) {
+                if (response.isSuccessful && response.body() != null) {
+                    val result = response.body()!!
+                    // Update menuItem with server ID and server image URLs
+                    val updatedMenuItem = menuItem.copy(id = result.userId, images = serverImageUrls)
+                    menuList.add(updatedMenuItem)
+                    adapter.notifyItemInserted(menuList.size - 1)
+                    Toast.makeText(this@AddMenuActivity, "Menu item saved to server with ${serverImageUrls.size} images", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Fallback to local database
+                    Toast.makeText(this@AddMenuActivity, "Server failed, saving locally...", Toast.LENGTH_SHORT).show()
+                    saveMenuItemLocally(menuItem)
+                }
+            }
 
-        val prefs = getSharedPreferences("menu_data", MODE_PRIVATE)
-        val gson = Gson()
-        prefs.edit().putString("menu_list", gson.toJson(menuList)).apply()
+            override fun onFailure(call: retrofit2.Call<RegisterResponse>, t: Throwable) {
+                // Fallback to local database
+                Toast.makeText(this@AddMenuActivity, "Server unreachable, saving locally...", Toast.LENGTH_SHORT).show()
+                saveMenuItemLocally(menuItem)
+            }
+        })
     }
 
-    private fun loadMenuItems(): List<MenuItem> {
-        val prefs = getSharedPreferences("menu_data", MODE_PRIVATE)
-        val gson = Gson()
-        val jsonList = prefs.getString("menu_list", "[]")
-        val type = object : TypeToken<MutableList<MenuItem>>() {}.type
-        return gson.fromJson(jsonList, type)
+    private fun saveMenuItemLocally(menuItem: MenuItem) {
+        dbHelper.insertMenuItem(menuItem, userId)
+        menuList.add(menuItem)
+        adapter.notifyItemInserted(menuList.size - 1)
+    }
+
+    private fun loadMenuFromServer() {
+        RetrofitClient.instance.getMenu(userId).enqueue(object : retrofit2.Callback<List<MenuItemResponse>> {
+            override fun onResponse(call: retrofit2.Call<List<MenuItemResponse>>, response: retrofit2.Response<List<MenuItemResponse>>) {
+                if (response.isSuccessful && response.body() != null) {
+                    val serverMenu = response.body()!!
+                    
+                    // Convert server response to MenuItem format
+                    val newMenuItems = serverMenu.map { serverItem ->
+                        MenuItem(
+                            id = serverItem.id,
+                            name = serverItem.name,
+                            images = serverItem.images,
+                            category = serverItem.category,
+                            price = serverItem.price,
+                            rating = serverItem.rating,
+                            prepTime = serverItem.prepTime,
+                            ingredients = serverItem.ingredients
+                        )
+                    }
+                    
+                    // Clear and add new items to existing list
+                    menuList.clear()
+                    menuList.addAll(newMenuItems)
+                    adapter.notifyDataSetChanged()
+                    Toast.makeText(this@AddMenuActivity, "Loaded ${menuList.size} items from server", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Fallback to local database
+                    Toast.makeText(this@AddMenuActivity, "Server returned empty, trying local...", Toast.LENGTH_SHORT).show()
+                    loadMenuFromLocal()
+                }
+            }
+
+            override fun onFailure(call: retrofit2.Call<List<MenuItemResponse>>, t: Throwable) {
+                // Fallback to local database
+                Toast.makeText(this@AddMenuActivity, "Server unreachable, loading local data...", Toast.LENGTH_SHORT).show()
+                loadMenuFromLocal()
+            }
+        })
+    }
+
+    private fun loadMenuFromLocal() {
+        val localItems = dbHelper.getMenuItems(userId)
+        menuList.clear()
+        menuList.addAll(localItems)
+        adapter.notifyDataSetChanged()
+        Toast.makeText(this, "Loaded ${menuList.size} items from local database", Toast.LENGTH_SHORT).show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

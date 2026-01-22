@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-07-04T10:57:30.467192500Z">
+        <DropdownSelection timestamp="2025-09-21T18:39:42.903242500Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\gauta\.android\avd\Medium_Phone_API_35_2.avd" />

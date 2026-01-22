@@ -30,6 +30,7 @@
             android:inputType="textCapWords" />
 
         <!-- Category Dropdown -->
+
         <AutoCompleteTextView
             android:id="@+id/etCategory"
             android:layout_width="match_parent"

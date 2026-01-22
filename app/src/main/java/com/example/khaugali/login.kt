@@ -64,34 +64,59 @@ class LoginActivity : AppCompatActivity() {
             } else if (TextUtils.isEmpty(password)) {
                 Toast.makeText(this, "Please enter your password", Toast.LENGTH_SHORT).show()
             } else {
-                val dbHelper = UserDatabaseHelper(this)
-                val user = dbHelper.getUser(email, password, userType)
+                // Show loading
+                loginButton.isEnabled = false
+                loginButton.text = "Logging in..."
 
-                if (user != null) {
-                    // Store login session
-                    val sharedPref = getSharedPreferences("UserPrefs", MODE_PRIVATE)
-                    with(sharedPref.edit()) {
-                        putInt("loggedInId", user.id)
-                        putString("loggedInName", user.name)
-                        putString("loggedInImageUri", user.imageUri)
-                        putString("userType", userType)
-                        apply()
+                // Try server login first
+                val loginRequest = LoginRequest(email, password, userType)
+                RetrofitClient.instance.login(loginRequest).enqueue(object : retrofit2.Callback<LoginResponse> {
+                    override fun onResponse(call: retrofit2.Call<LoginResponse>, response: retrofit2.Response<LoginResponse>) {
+                        loginButton.isEnabled = true
+                        loginButton.text = "Login"
+
+                        if (response.isSuccessful && response.body() != null) {
+                            val user = response.body()!!
+                            
+                            // Store login session
+                            val sharedPref = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+                            with(sharedPref.edit()) {
+                                putInt("loggedInUserId", user.id)
+                                putString("loggedInName", user.name)
+                                putString("loggedInImageUri", user.imageUri)
+                                putString("userType", userType)
+                                apply()
+                            }
+
+                            Toast.makeText(this@LoginActivity, "Login successful (Server)", Toast.LENGTH_SHORT).show()
+
+                            // Redirect to respective home screen
+                            val nextIntent = if (userType == "business") {
+                                Intent(this@LoginActivity, BusinessMainActivity::class.java)
+                            } else {
+                                Intent(this@LoginActivity, MainActivity::class.java)
+                            }
+                            nextIntent.putExtra("userType", userType)
+                            nextIntent.putExtra("USER_ID", user.id)
+
+                            startActivity(nextIntent)
+                            finish()
+                        } else {
+                            // Fallback to local database if server fails
+                            Toast.makeText(this@LoginActivity, "Server login failed, trying local...", Toast.LENGTH_SHORT).show()
+                            tryLocalLogin(email, password, userType)
+                        }
                     }
 
-                    Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
-
-                    // Redirect to respective home screen
-                    val nextIntent = if (userType == "business") {
-                        Intent(this, BusinessMainActivity::class.java)
-                    } else {
-                        Intent(this, MainActivity::class.java)
+                    override fun onFailure(call: retrofit2.Call<LoginResponse>, t: Throwable) {
+                        loginButton.isEnabled = true
+                        loginButton.text = "Login"
+                        
+                        // Fallback to local database if server is unreachable
+                        Toast.makeText(this@LoginActivity, "Server unreachable, trying local...", Toast.LENGTH_SHORT).show()
+                        tryLocalLogin(email, password, userType)
                     }
-                    nextIntent.putExtra("user", user)
-                    startActivity(nextIntent)
-                    finish()
-                } else {
-                    Toast.makeText(this, "Invalid credentials or wrong user type", Toast.LENGTH_SHORT).show()
-                }
+                })
             }
         }
 
@@ -114,6 +139,42 @@ class LoginActivity : AppCompatActivity() {
     override fun onBackPressed() {
         val intent = Intent(this, User_Type::class.java)
         startActivity(intent)
+        super.onBackPressed()
         finish()
+
+    }
+
+    // Fallback to local database login
+    private fun tryLocalLogin(email: String, password: String, userType: String) {
+        val dbHelper = UserDatabaseHelper(this)
+        val user = dbHelper.getUser(email, password, userType)
+
+        if (user != null) {
+            // Store login session
+            val sharedPref = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+            with(sharedPref.edit()) {
+                putInt("loggedInUserId", user.id)
+                putString("loggedInName", user.name)
+                putString("loggedInImageUri", user.imageUri)
+                putString("userType", userType)
+                apply()
+            }
+
+            Toast.makeText(this, "Login successful (Local)", Toast.LENGTH_SHORT).show()
+
+            // Redirect to respective home screen
+            val nextIntent = if (userType == "business") {
+                Intent(this, BusinessMainActivity::class.java)
+            } else {
+                Intent(this, MainActivity::class.java)
+            }
+            nextIntent.putExtra("userType", userType)
+            nextIntent.putExtra("USER_ID", user.id)
+
+            startActivity(nextIntent)
+            finish()
+        } else {
+            Toast.makeText(this, "Invalid credentials or wrong user type", Toast.LENGTH_SHORT).show()
+        }
     }
 }

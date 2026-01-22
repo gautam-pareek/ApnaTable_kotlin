@@ -30,12 +30,13 @@ class BusinessMainActivity : AppCompatActivity() {
         val drawerAbout = findViewById<TextView>(R.id.drawerAbout)
         val drawerLogout = findViewById<TextView>(R.id.drawerLogout)
 
-        // ✅ Get logged in user from intent
-        val loggedInUser = intent.getSerializableExtra("loggedInUser") as? User
+        val sharedPref = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+        val name = sharedPref.getString("loggedInName", "Log In")
+        val imageUri = sharedPref.getString("loggedInImageUri", null)
 
-        profileName.text = loggedInUser?.name ?: "Log In"
-        if (!loggedInUser?.imageUri.isNullOrEmpty()) {
-            profileImage.setImageURI(Uri.parse(loggedInUser.imageUri))
+        profileName.text = name
+        if (!imageUri.isNullOrEmpty()) {
+            profileImage.setImageURI(Uri.parse(imageUri))
         } else {
             profileImage.setImageResource(R.drawable.account)
         }
@@ -55,6 +56,7 @@ class BusinessMainActivity : AppCompatActivity() {
         }
 
         drawerLogout.setOnClickListener {
+            sharedPref.edit().clear().apply()
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             finish()
@@ -74,14 +76,6 @@ class BusinessMainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.Table).setOnClickListener {
             startActivity(Intent(this, BusinessTableActivity::class.java))
-        }
-
-        findViewById<Button>(R.id.Preorderstatus).setOnClickListener {
-            startActivity(Intent(this, PreorderStatusActivity::class.java))
-        }
-
-        findViewById<Button>(R.id.Deliverystatus).setOnClickListener {
-            startActivity(Intent(this, DeliveryStatusActivity::class.java))
         }
     }
 }

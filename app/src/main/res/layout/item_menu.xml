@@ -54,6 +54,19 @@
             android:layout_height="80dp"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_launcher_foreground" />
+
+        <ImageView
+            android:id="@+id/btnDelete"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="10dp"
+            android:background="@android:color/white"
+            android:contentDescription="Delete"
+            android:elevation="4dp"
+            android:padding="4dp"
+            android:src="@drawable/ic_delete" />
+
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

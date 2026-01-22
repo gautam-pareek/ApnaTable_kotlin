@@ -89,6 +89,19 @@
         android:contentDescription="Edit" />
 </LinearLayout>
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/saveLayoutBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="100dp"
+        android:contentDescription="Save Layout"
+        app:srcCompat="@drawable/ic_save"
+        android:tint="@android:color/white"
+        android:backgroundTint="#E9A557"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <!-- FAB -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addTableBtn"
@@ -102,6 +115,7 @@
         android:backgroundTint="#E9A557"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
 
     <LinearLayout
         android:id="@+id/editActionsLayout"
@@ -129,21 +143,6 @@
             android:contentDescription="Rotate"
             android:padding="8dp" />
 
-        <ImageButton
-            android:id="@+id/combineBtn"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/combine_icon"
-            android:contentDescription="Combine"
-            android:padding="8dp" />
-
-        <ImageButton
-            android:id="@+id/renameBtn"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/rename_icon"
-            android:contentDescription="Rename"
-            android:padding="8dp" />
     </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout

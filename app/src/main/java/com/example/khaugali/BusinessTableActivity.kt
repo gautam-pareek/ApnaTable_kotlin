@@ -58,6 +58,7 @@ class BusinessTableActivity : AppCompatActivity() {
 
         val tableStatusBtn = findViewById<Button>(R.id.TableCurrentStatus_B)
         tableStatusBtn.setOnClickListener {
+            //Toast.makeText(this, "Opening Table Status...", Toast.LENGTH_SHORT).show()
             val intent = Intent(this, TableStatusActivity::class.java)
             startActivity(intent)
         }
