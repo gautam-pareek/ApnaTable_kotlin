@@ -1,0 +1,79 @@
+# KHAUGALI PROJECT REPORT
+
+## Project Overview
+Khaugali is a comprehensive restaurant management system consisting of an Android mobile application and a Python Flask backend server. The project aims to provide a complete solution for restaurant owners to manage their menu, table layouts, and orders, while also offering customers a platform to browse menus, place orders, and track deliveries.
+
+## System Architecture
+
+### 1. Backend Server (Python Flask)
+The backend server is built using Flask, a lightweight Python web framework, and uses SQLite for database storage. The server provides RESTful API endpoints for the Android application to interact with.
+
+#### Key Components:
+- **Database Structure**: Uses SQLite with tables for Users, Menu, Layouts, and Orders
+- **API Endpoints**: Provides endpoints for user authentication, menu management, table layout management, and order processing
+- **Image Handling**: Supports uploading and serving images for menu items
+- **Authentication**: Simple authentication system for users with different roles (business owners and customers)
+
+### 2. Android Application (Kotlin)
+The frontend is an Android application written in Kotlin, following modern Android development practices.
+
+#### Key Components:
+- **User Interface**: Multiple activities for different functionalities (login, signup, menu management, table management, etc.)
+- **API Integration**: Uses Retrofit for API calls to the backend server
+- **User Types**: Supports different user types (business owners and customers) with different functionalities
+- **Image Handling**: Allows uploading and displaying images for menu items
+
+## Features
+
+### 1. User Management
+- User registration and login
+- Different user types (business owners and customers)
+- User profile management
+
+### 2. Menu Management (for Business Owners)
+- Add, edit, and delete menu items
+- Categorize menu items
+- Add images, ingredients, preparation time, and pricing information
+- Rate menu items
+
+### 3. Table Layout Management (for Business Owners)
+- Create and manage restaurant table layouts
+- Assign table types and labels
+- Track table status (available, occupied, reserved)
+
+### 4. Order Management
+- Place orders (for customers)
+- Track order status (pending, confirmed, preparing, ready, delivered)
+- Support for different order types (dine-in, takeaway, delivery)
+
+### 5. Search Functionality
+- Search menu items by name, category, or ingredients
+
+## Technical Implementation
+
+### Backend (Python Flask)
+- **Database**: SQLite with proper indexing for performance
+- **API Design**: RESTful API with JSON responses
+- **Error Handling**: Comprehensive error handling with appropriate HTTP status codes
+- **File Storage**: Local storage for uploaded images
+
+### Android Application (Kotlin)
+- **Architecture**: Activity-based architecture
+- **Network Communication**: Retrofit for API calls
+- **UI Components**: Custom layouts for different screens
+- **Image Handling**: Base64 encoding/decoding for image transfer
+
+## Future Enhancements
+Potential future enhancements for the Khaugali system could include:
+
+1. **Real-time Updates**: Implement WebSockets for real-time order status updates
+2. **Payment Integration**: Add payment gateway integration for online payments
+3. **Analytics Dashboard**: Provide business owners with analytics on sales, popular items, etc.
+4. **Customer Reviews**: Allow customers to leave reviews for menu items
+5. **Reservation System**: Enhance the table management with a reservation system
+6. **Push Notifications**: Implement push notifications for order status updates
+7. **Multi-language Support**: Add support for multiple languages
+8. **Offline Mode**: Implement offline functionality for basic operations
+
+## Conclusion
+The Khaugali project provides a comprehensive solution for restaurant management, covering both the business owner and customer perspectives. The combination of a robust backend server and a user-friendly Android application creates a seamless experience for all users. The system's modular design allows for easy expansion and enhancement in the future.

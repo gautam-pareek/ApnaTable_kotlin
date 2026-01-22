@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@android:color/white"
+    android:elevation="8dp">
+
+    <!-- Close button top right -->
+    <ImageButton
+        android:id="@+id/btnClose"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="end"
+        android:background="@android:color/transparent"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:contentDescription="Close" />
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Book Table"
+        android:textSize="20sp"
+        android:textColor="#E9A557"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:paddingBottom="16dp"/>
+
+    <!-- Customer Name Input -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Customer Name:"
+        android:textSize="16sp"
+        android:textColor="#333333"
+        android:paddingBottom="4dp"/>
+
+    <EditText
+        android:id="@+id/etCustomerName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter your name"
+        android:inputType="textPersonName"
+        android:padding="12dp"
+        android:background="@android:drawable/edit_text"
+        android:layout_marginBottom="12dp"/>
+
+    <!-- Time Slot From -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Time From:"
+        android:textSize="16sp"
+        android:textColor="#333333"
+        android:paddingBottom="4dp"/>
+
+    <EditText
+        android:id="@+id/etTimeFrom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="HH:MM"
+        android:inputType="time"
+        android:padding="12dp"
+        android:background="@android:drawable/edit_text"
+        android:layout_marginBottom="12dp"/>
+
+    <!-- Time Slot To -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Time To:"
+        android:textSize="16sp"
+        android:textColor="#333333"
+        android:paddingBottom="4dp"/>
+
+    <EditText
+        android:id="@+id/etTimeTo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="HH:MM"
+        android:inputType="time"
+        android:padding="12dp"
+        android:background="@android:drawable/edit_text"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Book Button -->
+    <Button
+        android:id="@+id/btnBookTable"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Book Table"
+        android:textColor="@android:color/white"
+        android:backgroundTint="#E9A557"
+        android:padding="12dp"/>
+
+</LinearLayout>
